@@ -12,10 +12,10 @@ import org.scaler.userservice.models.SessionStatus;
 import org.scaler.userservice.models.User;
 import org.scaler.userservice.Repository.UserRepository;
 
-import org.scaler.userservice.security.JwtTokenGenerator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -27,15 +27,17 @@ import java.util.Optional;
 public class AuthService {
 
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-
+    private final PasswordEncoder passwordEncoder ;
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
 
+
     public AuthService(UserRepository userRepository,
-                       SessionRepository sessionRepository) {
+                       SessionRepository sessionRepository,PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
+        this.passwordEncoder = passwordEncoder;
+
     }
 
     public UserDto signUp(String email, String password) throws UserAlreadyExistsException {
@@ -46,7 +48,7 @@ public class AuthService {
         }
         User user = new User();
         user.setEmail(email);
-        user.setPassword(bCryptPasswordEncoder.encode(password));
+        user.setPassword(passwordEncoder.encode(password));
         User savedUser = userRepository.save(user);
         return UserDto.from(savedUser);
 
@@ -60,7 +62,7 @@ public class AuthService {
 
         User user = userOptional.get();
 
-        if(!bCryptPasswordEncoder.matches(password, user.getPassword())){
+        if(!passwordEncoder.matches(password, user.getPassword())){
             return new ResponseEntity<>(HttpStatus.NON_AUTHORITATIVE_INFORMATION);
 
         }
