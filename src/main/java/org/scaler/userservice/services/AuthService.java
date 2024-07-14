@@ -12,6 +12,7 @@ import org.scaler.userservice.models.SessionStatus;
 import org.scaler.userservice.models.User;
 import org.scaler.userservice.Repository.UserRepository;
 
+import org.scaler.userservice.security.JwtTokenGenerator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,7 +27,7 @@ import java.util.Optional;
 public class AuthService {
 
 
-    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
@@ -67,8 +68,10 @@ public class AuthService {
         RandomStringUtils randomStringUtils = new RandomStringUtils();
         String token = randomStringUtils.randomAlphabetic(20);
 
+//        String token = JwtTokenGenerator.generateToken(email);
+
         MultiValueMap<String,String> headers = new LinkedMultiValueMap<>(new HashMap<>());
-        headers.add("AUTHTOKEN",token);
+        headers.add("AUTH_TOKEN",token);
 
         Session session = new Session();
         session.setSessionstatus(SessionStatus.ACTIVE);
@@ -86,22 +89,24 @@ public class AuthService {
 
     }
 
-    public SessionStatus validate(String token,Long userId)  {
+    public Optional<UserDto> validate(String token,Long userId)  {
+
         Optional<Session> sessionOptional = sessionRepository.findByTokenAndUser_Id(token,userId);
 
         if(sessionOptional.isEmpty()){
-            return SessionStatus.INVALID;
+            return Optional.empty();
 
         }
         Session session = sessionOptional.get();
 
         if(!session.getSessionstatus().equals(SessionStatus.ACTIVE)){
-            return SessionStatus.EXPIRED;
+            return Optional.empty();
         }
 
+        User user = userRepository.findById(userId).get();
+        UserDto userDto = UserDto.from(user);
 
-
-        return SessionStatus.ACTIVE;
+        return Optional.of(userDto);
 
 
     }

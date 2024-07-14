@@ -12,8 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -33,10 +33,6 @@ public class AuthController {
 
         return authService.login(request.getEmail(),request.getPassword());
 
-
-
-
-
     }
 
     public ResponseEntity<Void> logout(@RequestBody LogoutRequestDto request) {
@@ -55,11 +51,22 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<SessionStatus> validateToken(@RequestBody ValidateTokenRequestDto request){
+    public ResponseEntity<ValidateTokenResponseDto> validateToken(@RequestBody ValidateTokenRequestDto request){
 
-        SessionStatus sessionStatus = authService.validate(request.getToken(),request.getUserId());
+        Optional<UserDto> userDto = authService.validate(request.getToken(),request.getUserId());
 
-        return new ResponseEntity<>(sessionStatus,HttpStatus.OK);
+        if(userDto.isEmpty()){
+            ValidateTokenResponseDto response = new ValidateTokenResponseDto();
+            response.setSessionStatus(SessionStatus.INVALID);
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        }
+        ValidateTokenResponseDto response = new ValidateTokenResponseDto();
+        response.setSessionStatus(SessionStatus.ACTIVE);
+        response.setUserDto(userDto.get());
+
+        return new ResponseEntity<>(response,HttpStatus.OK);
+
+
 
 
     }
