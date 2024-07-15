@@ -1,9 +1,10 @@
-package org.scaler.userservice.security.Repository;
+package org.scaler.userservice.security.services;
 
 import java.util.HashSet;
 import java.util.Set;
 
 
+import org.scaler.userservice.security.Repository.AuthorizationConsentRepository;
 import org.scaler.userservice.security.models.AuthorizationConsent;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.core.GrantedAuthority;
