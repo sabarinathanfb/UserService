@@ -1,6 +1,7 @@
 package org.scaler.userservice.security.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.scaler.userservice.models.Role;
 import org.scaler.userservice.models.User;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @JsonDeserialize
 @NoArgsConstructor
+@Getter
 public class CustomUserDetails implements UserDetails {
 
     //    private User user;
@@ -24,7 +26,7 @@ public class CustomUserDetails implements UserDetails {
     private boolean accountNonLocked;
     private boolean credentialsNonExpired;
     private boolean enabled;
-//    private Long userId;
+    private Long userId;
 
 
 
@@ -43,16 +45,13 @@ public class CustomUserDetails implements UserDetails {
         this.accountNonLocked = true;
         this.credentialsNonExpired = true;
         this.enabled = true;
-//        this.userId = user.getId();
+        this.userId = user.getId();
     }
 
 //    public Long getUserId() {
 //        return userId;
 //    }
-//
-//    public void setUserId(Long userId) {
-//        this.userId = userId;
-//    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
